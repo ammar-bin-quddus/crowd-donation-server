@@ -36,6 +36,7 @@ async function run() {
     await client.connect();
 
     const campaignCollection = client.db("campaignDB").collection("campaigns");
+    const donatedCollection = client.db("campaignDB").collection("donated-collection");
 
     app.get("/addCampaign", async(req, res) => {
       const cursor = campaignCollection.find();
@@ -54,6 +55,14 @@ async function run() {
       const newCampaign = req.body;
       //console.log(newCampaign);
       const result = await campaignCollection.insertOne(newCampaign);
+      res.send(result);
+    })
+
+    app.post("/campaigns/:id", async(req, res) => {
+      const id = req.params.id;
+      const query = {_id: new ObjectId(id)};
+      const findResult = await campaignCollection.findOne(query);
+      const result = await donatedCollection.insertOne(findResult);
       res.send(result);
     })
 
