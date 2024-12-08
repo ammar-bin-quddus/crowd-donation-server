@@ -31,7 +31,7 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
+    //await client.connect();
 
     const campaignCollection = client.db("campaignDB").collection("campaigns");
     const donatedCollection = client
@@ -81,12 +81,12 @@ async function run() {
       res.send(result);
     });
 
-    app.get("/myDonations/:email", async(req, res) => {
+    app.get("/myDonations/:email", async (req, res) => {
       const email = req.params.email;
       const query = { email: email };
       const result = await donatedCollection.find(query).toArray();
       res.send(result);
-    })
+    });
 
     app.post("/users", async (req, res) => {
       const newUser = req.body;
@@ -111,19 +111,23 @@ async function run() {
         },
       };
 
-      const result = await campaignCollection.updateOne(filter, updatedData, options);
+      const result = await campaignCollection.updateOne(
+        filter,
+        updatedData,
+        options
+      );
       res.send(result);
     });
 
-    app.delete("/addCampaign/:id", async(req, res) => {
+    app.delete("/addCampaign/:id", async (req, res) => {
       const id = req.params.id;
-      const query = {_id: new ObjectId(id)};
+      const query = { _id: new ObjectId(id) };
       const result = await campaignCollection.deleteOne(query);
       res.send(result);
-    })
+    });
 
     // Send a ping to confirm a successful connection
-    await client.db("admin").command({ ping: 1 });
+    //await client.db("admin").command({ ping: 1 });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
     );
