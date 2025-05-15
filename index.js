@@ -9,6 +9,7 @@ const port = process.env.PORT || 5000;
 // middleware
 
 app.use(express.json());
+
 app.use(cors());
 
 app.get("/", (req, res) => {
@@ -73,12 +74,42 @@ async function run() {
       res.send(result);
     });
 
+    // app.post("/campaigns/:id", async (req, res) => {
+    //   const id = req.params.id;
+    //   const query = { _id: new ObjectId(id) };
+    //   const findResult = await campaignCollection.findOne(query);
+    //   const result = await donatedCollection.insertOne(findResult);
+    //   res.send(result);
+    // });
+
     app.post("/campaigns/:id", async (req, res) => {
-      const id = req.params.id;
-      const query = { _id: new ObjectId(id) };
-      const findResult = await campaignCollection.findOne(query);
-      const result = await donatedCollection.insertOne(findResult);
-      res.send(result);
+      try {
+        const id = req.params.id;
+        const donationData = req.body;
+
+        const campaign = await campaignCollection.findOne({
+          _id: new ObjectId(id),
+        });
+        if (!campaign) {
+          return res.status(404).json({ error: "Campaign not found" });
+        }
+
+        const donationEntry = {
+          campaignId: id,
+          campaignTitle: campaign.title,
+          campaignImage: campaign.photoUrl,
+          donorName: donationData.donorName,
+          donorEmail: donationData.donorEmail,
+          donatedAmount: donationData.amount,
+          donatedAt: new Date(),
+        };
+
+        const result = await donatedCollection.insertOne(donationEntry);
+        res.status(201).json(result);
+      } catch (error) {
+        console.error("Error processing donation:", error);
+        res.status(500).json({ error: "Internal server error" });
+      }
     });
 
     app.get("/myDonations/:email", async (req, res) => {
