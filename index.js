@@ -53,6 +53,22 @@ async function run() {
       res.send(result);
     });
 
+    app.get("/runningCampaigns", async (req, res) => {
+      try {
+        const today = new Date();
+
+        const campaigns = await campaignCollection
+          .find({ deadline: { $gte: today } }) // Running campaigns only
+          .sort({ deadline: 1 }) // Optional: Soonest deadline first
+          .limit(6)
+          .toArray();
+
+        res.send(campaigns);
+      } catch (error) {
+        res.status(500).send({ error: "Failed to fetch campaigns" });
+      }
+    });
+
     app.get("/updateCampaign/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
